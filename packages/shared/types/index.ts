@@ -112,7 +112,7 @@ export interface Route {
   completedOrders: number;
   startedAt?: string;
   completedAt?: string;
-  optimizedOrder: number[];
+  optimizedOrder: string[];
   createdAt: string;
 }
 
