@@ -1,10 +1,12 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import {
   Truck, Package, Warehouse, Fuel, Route, BarChart3, Bell, MapPin, Clock,
   TrendingUp, TrendingDown, AlertTriangle, CheckCircle, Search, ChevronRight,
-  Menu, X, Globe, Settings, Home, Navigation, Box, Activity, Zap, Plus, Send, Loader2
+  Menu, X, Globe, Settings, Home, Navigation, Box, Activity, Zap, Plus, Send, Loader2, LogOut
 } from "lucide-react";
+import { useAuth } from "@/lib/auth";
 
 const ORG = "default-org";
 const WH = "default-warehouse";
@@ -421,7 +423,19 @@ export default function Dashboard() {
   const [tab,setTab]=useState("dashboard");
   const [showNew,setShowNew]=useState(false);
   const [rk,setRk]=useState(0);
+  const { user, logout, loading } = useAuth();
+  const router = useRouter();
   const titles: AnyObj={dashboard:"Dashboard",orders:"Orders",fleet:"Fleet Management",warehouse:"Warehouse",routes:"Route Optimizer",fuel:"Fuel Analytics",predictions:"Predictions",analytics:"Analytics"};
+
+  useEffect(() => {
+    if (!loading && !user) router.push("/login");
+  }, [user, loading, router]);
+
+  if (loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="w-8 h-8 text-emerald-600 animate-spin" /></div>;
+  if (!user) return null;
+
+  const initials = user.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2);
+
   return (
     <div className="flex">
       <Sidebar activeTab={tab} setActiveTab={setTab}/>
@@ -433,6 +447,11 @@ export default function Dashboard() {
               <button className="relative p-2 hover:bg-gray-100 rounded-lg"><Bell className="w-5 h-5"/><span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"/></button>
               <button className="p-2 hover:bg-gray-100 rounded-lg"><Globe className="w-5 h-5"/></button>
               <button className="p-2 hover:bg-gray-100 rounded-lg"><Settings className="w-5 h-5"/></button>
+              <div className="flex items-center gap-3 pl-4 border-l border-gray-200">
+                <div className="w-8 h-8 bg-emerald-700 rounded-full flex items-center justify-center text-white text-sm font-bold">{initials}</div>
+                <div className="hidden md:block"><p className="text-sm font-medium">{user.name}</p><p className="text-xs text-gray-500">{user.role}</p></div>
+                <button onClick={() => { logout(); router.push("/login"); }} className="p-2 hover:bg-gray-100 rounded-lg text-gray-500 hover:text-red-600" title="Sign out"><LogOut className="w-4 h-4"/></button>
+              </div>
             </div>
           </div>
         </header>
